@@ -1,6 +1,6 @@
 Feature: Code Execution
-  As a developer
-  I want to execute code snippets
+  As a user
+  I want to execute code
   So that I can see their output
 
   Scenario: Valid Python Code
