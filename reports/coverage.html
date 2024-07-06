@@ -63,6 +63,10 @@
 				
 				<option value="file3">github.com/YanSystems/compiler/pkg/compiler/python.go (93.8%)</option>
 				
+				<option value="file4">github.com/YanSystems/compiler/pkg/services/compiler.go (0.0%)</option>
+				
+				<option value="file5">github.com/YanSystems/compiler/pkg/utils/json.go (100.0%)</option>
+				
 				</select>
 			</div>
 			<div id="legend">
@@ -214,6 +218,87 @@ func cleanErrorMessage(msg string) string <span class="cov8" title="1">{
                 }</span>
         }
         <span class="cov0" title="0">return strings.TrimSpace(msg)</span>
+}
+</pre>
+		
+		<pre class="file" id="file4" style="display: none">package services
+
+import (
+        "net/http"
+)
+
+func ExecutePython(w http.ResponseWriter, r *http.Request) {<span class="cov0" title="0">
+}</span>
+</pre>
+		
+		<pre class="file" id="file5" style="display: none">package utils
+
+import (
+        "encoding/json"
+        "errors"
+        "io"
+        "net/http"
+)
+
+type JsonResponse struct {
+        Error   bool   `json:"error"`
+        Message string `json:"message"`
+        Data    any    `json:"data,omitempty"`
+}
+
+func ReadJSON(w http.ResponseWriter, r *http.Request, data any) error <span class="cov8" title="1">{
+        maxBytes := 1048576 // one megabyte
+
+        r.Body = http.MaxBytesReader(w, r.Body, int64(maxBytes))
+
+        dec := json.NewDecoder(r.Body)
+        err := dec.Decode(data)
+        if err != nil </span><span class="cov8" title="1">{
+                return err
+        }</span>
+
+        <span class="cov8" title="1">err = dec.Decode(&amp;struct{}{})
+        if err != io.EOF </span><span class="cov8" title="1">{
+                return errors.New("body must have only a single JSON value")
+        }</span>
+
+        <span class="cov8" title="1">return nil</span>
+}
+
+func WriteJSON(w http.ResponseWriter, status int, data any, headers ...http.Header) error <span class="cov8" title="1">{
+        out, err := json.Marshal(data)
+        if err != nil </span><span class="cov8" title="1">{
+                return err
+        }</span>
+
+        <span class="cov8" title="1">if len(headers) &gt; 0 </span><span class="cov8" title="1">{
+                for key, value := range headers[0] </span><span class="cov8" title="1">{
+                        w.Header()[key] = value
+                }</span>
+        }
+
+        <span class="cov8" title="1">w.Header().Set("Content-Type", "application/json")
+        w.WriteHeader(status)
+        _, err = w.Write(out)
+        if err != nil </span><span class="cov8" title="1">{
+                return err
+        }</span>
+
+        <span class="cov8" title="1">return nil</span>
+}
+
+func ErrorJSON(w http.ResponseWriter, err error, status ...int) error <span class="cov8" title="1">{
+        statusCode := http.StatusBadRequest
+
+        if len(status) &gt; 0 </span><span class="cov8" title="1">{
+                statusCode = status[0]
+        }</span>
+
+        <span class="cov8" title="1">var payload JsonResponse
+        payload.Error = true
+        payload.Message = err.Error()
+
+        return WriteJSON(w, statusCode, payload)</span>
 }
 </pre>
 		
