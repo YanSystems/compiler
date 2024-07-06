@@ -73,3 +73,14 @@ func TestNewRouter(t *testing.T) {
 		}
 	})
 }
+
+type MockServer struct {
+	ListenAndServeFunc func() error
+}
+
+func (m *MockServer) ListenAndServe() error {
+	if m.ListenAndServeFunc != nil {
+		return m.ListenAndServeFunc()
+	}
+	return nil
+}
