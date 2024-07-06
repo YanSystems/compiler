@@ -1,10 +1,9 @@
 mode: set
-github.com/YanSystems/compiler/cmd/api/api.go:17.43,32.2 3 0
-github.com/YanSystems/compiler/cmd/api/api.go:34.43,42.2 3 0
-github.com/YanSystems/compiler/cmd/api/api.go:44.43,48.16 3 0
-github.com/YanSystems/compiler/cmd/api/api.go:48.16,51.3 2 0
+github.com/YanSystems/compiler/cmd/api/api.go:18.43,33.2 4 0
+github.com/YanSystems/compiler/cmd/api/api.go:35.43,43.2 3 0
+github.com/YanSystems/compiler/cmd/api/api.go:45.43,49.16 3 0
+github.com/YanSystems/compiler/cmd/api/api.go:49.16,52.3 2 0
 github.com/YanSystems/compiler/cmd/api/main.go:3.13,10.2 3 0
-github.com/YanSystems/compiler/pkg/services/compiler.go:7.61,8.2 0 0
 github.com/YanSystems/compiler/pkg/utils/json.go:16.71,23.16 5 1
 github.com/YanSystems/compiler/pkg/utils/json.go:23.16,25.3 1 1
 github.com/YanSystems/compiler/pkg/utils/json.go:27.2,28.19 2 1
@@ -21,6 +20,13 @@ github.com/YanSystems/compiler/pkg/utils/json.go:54.2,54.12 1 1
 github.com/YanSystems/compiler/pkg/utils/json.go:57.71,60.21 2 1
 github.com/YanSystems/compiler/pkg/utils/json.go:60.21,62.3 1 1
 github.com/YanSystems/compiler/pkg/utils/json.go:64.2,68.42 4 1
+github.com/YanSystems/compiler/pkg/services/compiler.go:12.66,15.16 3 1
+github.com/YanSystems/compiler/pkg/services/compiler.go:15.16,19.3 3 1
+github.com/YanSystems/compiler/pkg/services/compiler.go:21.2,21.65 1 1
+github.com/YanSystems/compiler/pkg/services/compiler.go:21.65,26.3 4 1
+github.com/YanSystems/compiler/pkg/services/compiler.go:28.2,29.16 2 1
+github.com/YanSystems/compiler/pkg/services/compiler.go:29.16,33.3 3 0
+github.com/YanSystems/compiler/pkg/services/compiler.go:35.2,41.52 2 1
 github.com/YanSystems/compiler/pkg/compiler/compiler.go:16.52,20.16 3 1
 github.com/YanSystems/compiler/pkg/compiler/compiler.go:21.16,22.34 1 1
 github.com/YanSystems/compiler/pkg/compiler/compiler.go:23.10,28.12 2 1

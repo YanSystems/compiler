@@ -6,6 +6,7 @@ import (
 	"log/slog"
 	"net/http"
 
+	"github.com/YanSystems/compiler/pkg/services"
 	"github.com/go-chi/chi/v5"
 	"github.com/go-chi/cors"
 )
@@ -26,7 +27,7 @@ func (s *Server) NewRouter() http.Handler {
 		MaxAge:           300,
 	}))
 
-	// Handlers here...
+	router.Post("/python", services.HandleExecutePython)
 
 	return router
 }

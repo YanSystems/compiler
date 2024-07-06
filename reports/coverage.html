@@ -63,7 +63,7 @@
 				
 				<option value="file3">github.com/YanSystems/compiler/pkg/compiler/python.go (93.8%)</option>
 				
-				<option value="file4">github.com/YanSystems/compiler/pkg/services/compiler.go (0.0%)</option>
+				<option value="file4">github.com/YanSystems/compiler/pkg/services/compiler.go (83.3%)</option>
 				
 				<option value="file5">github.com/YanSystems/compiler/pkg/utils/json.go (100.0%)</option>
 				
@@ -87,6 +87,7 @@ import (
         "log/slog"
         "net/http"
 
+        "github.com/YanSystems/compiler/pkg/services"
         "github.com/go-chi/chi/v5"
         "github.com/go-chi/cors"
 )
@@ -107,7 +108,7 @@ func (s *Server) NewRouter() http.Handler <span class="cov0" title="0">{
                 MaxAge:           300,
         }))
 
-        // Handlers here...
+        router.Post("/python", services.HandleExecutePython)
 
         return router
 }</span>
@@ -224,11 +225,45 @@ func cleanErrorMessage(msg string) string <span class="cov8" title="1">{
 		<pre class="file" id="file4" style="display: none">package services
 
 import (
+        "errors"
+        "log/slog"
         "net/http"
+
+        "github.com/YanSystems/compiler/pkg/compiler"
+        "github.com/YanSystems/compiler/pkg/utils"
 )
 
-func ExecutePython(w http.ResponseWriter, r *http.Request) {<span class="cov0" title="0">
-}</span>
+func HandleExecutePython(w http.ResponseWriter, r *http.Request) <span class="cov8" title="1">{
+        var userSubmittedCode compiler.Code
+        err := utils.ReadJSON(w, r, &amp;userSubmittedCode)
+        if err != nil </span><span class="cov8" title="1">{
+                slog.Error("Failed to read JSON request", "error", err)
+                utils.ErrorJSON(w, err)
+                return
+        }</span>
+
+        <span class="cov8" title="1">if userSubmittedCode.Lang == "" || userSubmittedCode.Src == "" </span><span class="cov8" title="1">{
+                err := errors.New("missing fields in request payload")
+                slog.Error("Validation error", "error", err)
+                utils.ErrorJSON(w, err, http.StatusBadRequest)
+                return
+        }</span>
+
+        <span class="cov8" title="1">output, err := userSubmittedCode.Execute()
+        if err != nil </span><span class="cov0" title="0">{
+                slog.Error("Failed to execute Python script", "error", err)
+                utils.ErrorJSON(w, err, http.StatusBadRequest)
+                return
+        }</span>
+
+        <span class="cov8" title="1">responsePayload := utils.JsonResponse{
+                Error:   false,
+                Message: "Python script has been successfully processed",
+                Data:    output,
+        }
+
+        utils.WriteJSON(w, http.StatusOK, responsePayload)</span>
+}
 </pre>
 		
 		<pre class="file" id="file5" style="display: none">package utils
