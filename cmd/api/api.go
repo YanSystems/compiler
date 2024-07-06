@@ -27,6 +27,13 @@ func (s *Server) NewRouter() http.Handler {
 		MaxAge:           300,
 	}))
 
+	// Health check
+	router.Get("/health", func(w http.ResponseWriter, r *http.Request) {
+		w.WriteHeader(http.StatusOK)
+		w.Write([]byte("OK"))
+	})
+
+	// Compiler services
 	router.Post("/python", services.HandleExecutePython)
 
 	return router

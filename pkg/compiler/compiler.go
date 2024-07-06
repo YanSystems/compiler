@@ -3,9 +3,9 @@ package compiler
 import "fmt"
 
 type Code struct {
-	Lang string   `json:"language"`
+	Lang string   `json:"lang"`
 	Src  string   `json:"src"`
-	Args []string `json:"arguments"`
+	Args []string `json:"args"`
 }
 
 type ExecutionResult struct {

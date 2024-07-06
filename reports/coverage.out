@@ -1,8 +1,10 @@
 mode: set
-github.com/YanSystems/compiler/cmd/api/api.go:18.43,33.2 4 0
-github.com/YanSystems/compiler/cmd/api/api.go:35.43,43.2 3 0
-github.com/YanSystems/compiler/cmd/api/api.go:45.43,49.16 3 0
-github.com/YanSystems/compiler/cmd/api/api.go:49.16,52.3 2 0
+github.com/YanSystems/compiler/cmd/api/api.go:18.43,31.69 3 1
+github.com/YanSystems/compiler/cmd/api/api.go:31.69,34.3 2 1
+github.com/YanSystems/compiler/cmd/api/api.go:37.2,39.15 2 1
+github.com/YanSystems/compiler/cmd/api/api.go:42.43,50.2 3 1
+github.com/YanSystems/compiler/cmd/api/api.go:52.43,56.16 3 0
+github.com/YanSystems/compiler/cmd/api/api.go:56.16,59.3 2 0
 github.com/YanSystems/compiler/cmd/api/main.go:3.13,10.2 3 0
 github.com/YanSystems/compiler/pkg/utils/json.go:16.71,23.16 5 1
 github.com/YanSystems/compiler/pkg/utils/json.go:23.16,25.3 1 1

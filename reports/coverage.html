@@ -55,7 +55,7 @@
 			<div id="nav">
 				<select id="files">
 				
-				<option value="file0">github.com/YanSystems/compiler/cmd/api/api.go (0.0%)</option>
+				<option value="file0">github.com/YanSystems/compiler/cmd/api/api.go (66.7%)</option>
 				
 				<option value="file1">github.com/YanSystems/compiler/cmd/api/main.go (0.0%)</option>
 				
@@ -96,7 +96,7 @@ type Server struct {
         Port string
 }
 
-func (s *Server) NewRouter() http.Handler <span class="cov0" title="0">{
+func (s *Server) NewRouter() http.Handler <span class="cov8" title="1">{
         router := chi.NewRouter()
 
         router.Use(cors.Handler(cors.Options{
@@ -108,12 +108,19 @@ func (s *Server) NewRouter() http.Handler <span class="cov0" title="0">{
                 MaxAge:           300,
         }))
 
-        router.Post("/python", services.HandleExecutePython)
+        // Health check
+        router.Get("/health", func(w http.ResponseWriter, r *http.Request) </span><span class="cov8" title="1">{
+                w.WriteHeader(http.StatusOK)
+                w.Write([]byte("OK"))
+        }</span>)
 
-        return router
-}</span>
+        // Compiler services
+        <span class="cov8" title="1">router.Post("/python", services.HandleExecutePython)
 
-func (s *Server) NewServer() *http.Server <span class="cov0" title="0">{
+        return router</span>
+}
+
+func (s *Server) NewServer() *http.Server <span class="cov8" title="1">{
         router := s.NewRouter()
         server := &amp;http.Server{
                 Addr:    fmt.Sprintf(":%s", s.Port),
@@ -151,9 +158,9 @@ func main() <span class="cov0" title="0">{
 import "fmt"
 
 type Code struct {
-        Lang string   `json:"language"`
+        Lang string   `json:"lang"`
         Src  string   `json:"src"`
-        Args []string `json:"arguments"`
+        Args []string `json:"args"`
 }
 
 type ExecutionResult struct {
