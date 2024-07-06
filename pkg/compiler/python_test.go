@@ -8,26 +8,13 @@ type TestCase struct {
 	Expected ExecutionResult
 }
 
-func (tc *TestCase) Run(t *testing.T) {
-	t.Run(tc.Label, func(t *testing.T) {
-		result, err := tc.Code.Execute()
-		if err != nil {
-			t.Errorf("unexpected error: %v", err)
-			return
-		}
-		if result.Error != tc.Expected.Error || result.Output != tc.Expected.Output {
-			t.Errorf("executePython() = %v, Expected %v", result, tc.Expected)
-		}
-	})
-}
-
 func TestValidPythonCode(t *testing.T) {
 	tc := TestCase{
 		Label: "Valid Python Code",
 		Code: Code{
-			Language:  "python",
-			Src:       "print('hello world')",
-			Arguments: []string{},
+			Lang: "python",
+			Src:  "print('hello world')",
+			Args: []string{},
 		},
 		Expected: ExecutionResult{
 			Error:  false,
@@ -42,26 +29,26 @@ func TestInvalidPythonCode(t *testing.T) {
 	tc := TestCase{
 		Label: "Invalid Python Code",
 		Code: Code{
-			Language:  "python",
-			Src:       "print('hello world'",
-			Arguments: []string{},
+			Lang: "python",
+			Src:  "print('hello world'",
+			Args: []string{},
 		},
 		Expected: ExecutionResult{
 			Error:  true,
-			Output: "SyntaxError: EOL while scanning string literal\n",
+			Output: "SyntaxError: '(' was never closed",
 		},
 	}
 
 	tc.Run(t)
 }
 
-func TestPythonCodeWithArguments(t *testing.T) {
+func TestPythonCodeWithArgs(t *testing.T) {
 	tc := TestCase{
-		Label: "Python Code with Arguments",
+		Label: "Python Code with Args",
 		Code: Code{
-			Language:  "python",
-			Src:       "import sys\nprint(sys.argv[1])",
-			Arguments: []string{"test-arg"},
+			Lang: "python",
+			Src:  "import sys\nprint(sys.argv[1])",
+			Args: []string{"test-arg"},
 		},
 		Expected: ExecutionResult{
 			Error:  false,
@@ -76,9 +63,9 @@ func TestLongRunningPythonCode(t *testing.T) {
 	tc := TestCase{
 		Label: "Long-running Python Code",
 		Code: Code{
-			Language:  "python",
-			Src:       "import time\ntime.sleep(2)\nprint('Done')",
-			Arguments: []string{},
+			Lang: "python",
+			Src:  "import time\ntime.sleep(2)\nprint('Done')",
+			Args: []string{},
 		},
 		Expected: ExecutionResult{
 			Error:  false,
@@ -93,13 +80,13 @@ func TestPythonCodeWithSyntaxError(t *testing.T) {
 	tc := TestCase{
 		Label: "Python Code with Syntax Error",
 		Code: Code{
-			Language:  "python",
-			Src:       "def func:\nprint('Hello')",
-			Arguments: []string{},
+			Lang: "python",
+			Src:  "def func:\nprint('Hello')",
+			Args: []string{},
 		},
 		Expected: ExecutionResult{
 			Error:  true,
-			Output: "SyntaxError: invalid syntax\n",
+			Output: "SyntaxError: invalid syntax",
 		},
 	}
 
@@ -110,13 +97,13 @@ func TestPythonCodeWithRuntimeError(t *testing.T) {
 	tc := TestCase{
 		Label: "Python Code with Runtime Error",
 		Code: Code{
-			Language:  "python",
-			Src:       "print(1 / 0)",
-			Arguments: []string{},
+			Lang: "python",
+			Src:  "print(1 / 0)",
+			Args: []string{},
 		},
 		Expected: ExecutionResult{
 			Error:  true,
-			Output: "ZeroDivisionError: division by zero\n",
+			Output: "ZeroDivisionError: division by zero",
 		},
 	}
 
@@ -127,9 +114,9 @@ func TestEmptyPythonCode(t *testing.T) {
 	tc := TestCase{
 		Label: "Empty Python Code",
 		Code: Code{
-			Language:  "python",
-			Src:       "",
-			Arguments: []string{},
+			Lang: "python",
+			Src:  "",
+			Args: []string{},
 		},
 		Expected: ExecutionResult{
 			Error:  false,
@@ -144,9 +131,9 @@ func TestPythonCodeWithUnicodeCharacters(t *testing.T) {
 	tc := TestCase{
 		Label: "Python Code with Unicode Characters",
 		Code: Code{
-			Language:  "python",
-			Src:       "print('こんにちは世界')",
-			Arguments: []string{},
+			Lang: "python",
+			Src:  "print('こんにちは世界')",
+			Args: []string{},
 		},
 		Expected: ExecutionResult{
 			Error:  false,
@@ -157,13 +144,13 @@ func TestPythonCodeWithUnicodeCharacters(t *testing.T) {
 	tc.Run(t)
 }
 
-func TestPythonCodeWithMultipleArguments(t *testing.T) {
+func TestPythonCodeWithMultipleArgs(t *testing.T) {
 	tc := TestCase{
-		Label: "Python Code with Multiple Arguments",
+		Label: "Python Code with Multiple Args",
 		Code: Code{
-			Language:  "python",
-			Src:       "import sys\nprint(' '.join(sys.argv[1:]))",
-			Arguments: []string{"arg1", "arg2", "arg3"},
+			Lang: "python",
+			Src:  "import sys\nprint(' '.join(sys.argv[1:]))",
+			Args: []string{"arg1", "arg2", "arg3"},
 		},
 		Expected: ExecutionResult{
 			Error:  false,
@@ -178,9 +165,9 @@ func TestPythonCodeWithEnvironmentVariable(t *testing.T) {
 	tc := TestCase{
 		Label: "Python Code with Environment Variable",
 		Code: Code{
-			Language:  "python",
-			Src:       "import os\nprint(os.getenv('TEST_ENV'))",
-			Arguments: []string{},
+			Lang: "python",
+			Src:  "import os\nprint(os.getenv('TEST_ENV'))",
+			Args: []string{},
 		},
 		Expected: ExecutionResult{
 			Error:  false,

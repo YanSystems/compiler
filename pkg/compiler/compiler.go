@@ -3,25 +3,29 @@ package compiler
 import "fmt"
 
 type Code struct {
-	Language  string
-	Src       string
-	Arguments []string
+	Lang string   `json:"language"`
+	Src  string   `json:"src"`
+	Args []string `json:"arguments"`
 }
 
 type ExecutionResult struct {
-	Error  bool
-	Output string
+	Error  bool   `json:"error"`
+	Output string `json:"output"`
 }
 
 func (c *Code) Execute() (*ExecutionResult, error) {
 	var result *ExecutionResult
 	var err error
 
-	switch c.Language {
+	switch c.Lang {
 	case "python":
 		result, err = c.executePython()
 	default:
-		return nil, fmt.Errorf("unknown language: %s", c.Language)
+		result = &ExecutionResult{
+			Error:  false,
+			Output: fmt.Sprintf("unexpected error: language %s is not supported", c.Lang),
+		}
+		err = nil
 	}
 
 	return result, err

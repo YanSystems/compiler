@@ -59,9 +59,9 @@
 				
 				<option value="file1">github.com/YanSystems/compiler/cmd/api/main.go (0.0%)</option>
 				
-				<option value="file2">github.com/YanSystems/compiler/pkg/compiler/compiler.go (83.3%)</option>
+				<option value="file2">github.com/YanSystems/compiler/pkg/compiler/compiler.go (100.0%)</option>
 				
-				<option value="file3">github.com/YanSystems/compiler/pkg/compiler/python.go (100.0%)</option>
+				<option value="file3">github.com/YanSystems/compiler/pkg/compiler/python.go (93.8%)</option>
 				
 				</select>
 			</div>
@@ -146,25 +146,29 @@ func main() <span class="cov0" title="0">{
 import "fmt"
 
 type Code struct {
-        Language  string
-        Src       string
-        Arguments []string
+        Lang string   `json:"language"`
+        Src  string   `json:"src"`
+        Args []string `json:"arguments"`
 }
 
 type ExecutionResult struct {
-        Error  bool
-        Output string
+        Error  bool   `json:"error"`
+        Output string `json:"output"`
 }
 
 func (c *Code) Execute() (*ExecutionResult, error) <span class="cov8" title="1">{
         var result *ExecutionResult
         var err error
 
-        switch c.Language </span>{
+        switch c.Lang </span>{
         case "python":<span class="cov8" title="1">
                 result, err = c.executePython()</span>
-        default:<span class="cov0" title="0">
-                return nil, fmt.Errorf("unknown language: %s", c.Language)</span>
+        default:<span class="cov8" title="1">
+                result = &amp;ExecutionResult{
+                        Error:  false,
+                        Output: fmt.Sprintf("unexpected error: language %s is not supported", c.Lang),
+                }
+                err = nil</span>
         }
 
         <span class="cov8" title="1">return result, err</span>
@@ -173,12 +177,44 @@ func (c *Code) Execute() (*ExecutionResult, error) <span class="cov8" title="1">
 		
 		<pre class="file" id="file3" style="display: none">package compiler
 
+import (
+        "bytes"
+        "os/exec"
+        "strings"
+)
+
 func (c *Code) executePython() (*ExecutionResult, error) <span class="cov8" title="1">{
-        return &amp;ExecutionResult{
+        args := append([]string{"-c", c.Src}, c.Args...)
+        cmd := exec.Command("python3", args...)
+        var out bytes.Buffer
+        var stderr bytes.Buffer
+        cmd.Stdout = &amp;out
+        cmd.Stderr = &amp;stderr
+
+        err := cmd.Run()
+        if err != nil </span><span class="cov8" title="1">{
+                return &amp;ExecutionResult{
+                        Error:  true,
+                        Output: cleanErrorMessage(stderr.String()),
+                }, nil
+        }</span>
+
+        <span class="cov8" title="1">return &amp;ExecutionResult{
                 Error:  false,
-                Output: "hello world\n",
-        }, nil
-}</span>
+                Output: out.String(),
+        }, nil</span>
+}
+
+func cleanErrorMessage(msg string) string <span class="cov8" title="1">{
+        lines := strings.Split(msg, "\n")
+        for i := len(lines) - 1; i &gt;= 0; i-- </span><span class="cov8" title="1">{
+                line := strings.TrimSpace(lines[i])
+                if line != "" </span><span class="cov8" title="1">{
+                        return line
+                }</span>
+        }
+        <span class="cov0" title="0">return strings.TrimSpace(msg)</span>
+}
 </pre>
 		
 		</div>
