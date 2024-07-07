@@ -1,0 +1,14 @@
+version: 2
+updates:
+  - package-ecosystem: gomod
+    directory: "/"
+    schedule:
+      interval: "daily"
+    commit-message:
+      prefix: "chore"
+      prefix-development: "chore(dev)"
+      include: scope
+    assignees:
+      - abyanmajid
+    reviewers:
+      - abyanmajid
