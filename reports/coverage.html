@@ -55,15 +55,15 @@
 			<div id="nav">
 				<select id="files">
 				
-				<option value="file0">github.com/YanSystems/compiler/cmd/api/api.go (66.7%)</option>
+				<option value="file0">github.com/YanSystems/compiler/cmd/api/api.go (73.9%)</option>
 				
 				<option value="file1">github.com/YanSystems/compiler/cmd/api/main.go (0.0%)</option>
 				
-				<option value="file2">github.com/YanSystems/compiler/pkg/compiler/compiler.go (100.0%)</option>
+				<option value="file2">github.com/YanSystems/compiler/pkg/compiler/compiler.go (92.9%)</option>
 				
-				<option value="file3">github.com/YanSystems/compiler/pkg/compiler/python.go (93.8%)</option>
+				<option value="file3">github.com/YanSystems/compiler/pkg/compiler/python.go (95.2%)</option>
 				
-				<option value="file4">github.com/YanSystems/compiler/pkg/services/compiler.go (83.3%)</option>
+				<option value="file4">github.com/YanSystems/compiler/pkg/services/compiler.go (88.0%)</option>
 				
 				<option value="file5">github.com/YanSystems/compiler/pkg/utils/json.go (100.0%)</option>
 				
@@ -97,6 +97,7 @@ type Server struct {
 }
 
 func (s *Server) NewRouter() http.Handler <span class="cov8" title="1">{
+        slog.Info("Setting up new router")
         router := chi.NewRouter()
 
         router.Use(cors.Handler(cors.Options{
@@ -107,25 +108,31 @@ func (s *Server) NewRouter() http.Handler <span class="cov8" title="1">{
                 AllowCredentials: true,
                 MaxAge:           300,
         }))
+        slog.Info("CORS middleware configured")
 
         // Health check
         router.Get("/health", func(w http.ResponseWriter, r *http.Request) </span><span class="cov8" title="1">{
+                slog.Debug("Health check endpoint hit")
                 w.WriteHeader(http.StatusOK)
                 w.Write([]byte("OK"))
         }</span>)
+        <span class="cov8" title="1">slog.Info("Health check route configured")
 
         // Compiler services
-        <span class="cov8" title="1">router.Post("/python", services.HandleExecutePython)
+        router.Post("/python", services.HandleExecutePython)
+        slog.Info("Compiler service routes configured")
 
         return router</span>
 }
 
 func (s *Server) NewServer() *http.Server <span class="cov8" title="1">{
+        slog.Info("Creating new server instance")
         router := s.NewRouter()
         server := &amp;http.Server{
                 Addr:    fmt.Sprintf(":%s", s.Port),
                 Handler: router,
         }
+        slog.Info("New server instance created", "port", s.Port)
 
         return server
 }</span>
@@ -135,6 +142,7 @@ func (s *Server) Run(server *http.Server) <span class="cov0" title="0">{
 
         err := server.ListenAndServe()
         if err != nil </span><span class="cov0" title="0">{
+                slog.Error("Server encountered an error", "error", err)
                 log.Panic(err)
                 return
         }</span>
@@ -155,7 +163,10 @@ func main() <span class="cov0" title="0">{
 		
 		<pre class="file" id="file2" style="display: none">package compiler
 
-import "fmt"
+import (
+        "fmt"
+        "log/slog"
+)
 
 type Code struct {
         Lang string   `json:"lang"`
@@ -169,13 +180,21 @@ type ExecutionResult struct {
 }
 
 func (c *Code) Execute() (*ExecutionResult, error) <span class="cov8" title="1">{
+        slog.Debug("Execute called", "language", c.Lang)
         var result *ExecutionResult
         var err error
 
         switch c.Lang </span>{
         case "python":<span class="cov8" title="1">
-                result, err = c.executePython()</span>
+                slog.Debug("Executing Python code", "source", c.Src)
+                result, err = c.executePython()
+                if err != nil </span><span class="cov0" title="0">{
+                        slog.Error("Failed to execute Python code", "error", err)
+                }</span> else<span class="cov8" title="1"> {
+                        slog.Info("Python code executed successfully", "result", result)
+                }</span>
         default:<span class="cov8" title="1">
+                slog.Error("Unsupported language", "language", c.Lang)
                 result = &amp;ExecutionResult{
                         Error:  false,
                         Output: fmt.Sprintf("unexpected error: language %s is not supported", c.Lang),
@@ -183,7 +202,8 @@ func (c *Code) Execute() (*ExecutionResult, error) <span class="cov8" title="1">
                 err = nil</span>
         }
 
-        <span class="cov8" title="1">return result, err</span>
+        <span class="cov8" title="1">slog.Debug("Execution result", "result", result)
+        return result, err</span>
 }
 </pre>
 		
@@ -191,11 +211,14 @@ func (c *Code) Execute() (*ExecutionResult, error) <span class="cov8" title="1">
 
 import (
         "bytes"
+        "log/slog"
         "os/exec"
         "strings"
 )
 
 func (c *Code) executePython() (*ExecutionResult, error) <span class="cov8" title="1">{
+        slog.Debug("Preparing to execute Python code", "source", c.Src, "args", c.Args)
+
         args := append([]string{"-c", c.Src}, c.Args...)
         cmd := exec.Command("python3", args...)
         var out bytes.Buffer
@@ -203,15 +226,20 @@ func (c *Code) executePython() (*ExecutionResult, error) <span class="cov8" titl
         cmd.Stdout = &amp;out
         cmd.Stderr = &amp;stderr
 
+        slog.Debug("Running Python command", "command", cmd.String())
+
         err := cmd.Run()
         if err != nil </span><span class="cov8" title="1">{
+                errorMessage := cleanErrorMessage(stderr.String())
+                slog.Error("Python script execution failed", "error", errorMessage)
                 return &amp;ExecutionResult{
                         Error:  true,
-                        Output: cleanErrorMessage(stderr.String()),
+                        Output: errorMessage,
                 }, nil
         }</span>
 
-        <span class="cov8" title="1">return &amp;ExecutionResult{
+        <span class="cov8" title="1">slog.Debug("Python script executed successfully", "output", out.String())
+        return &amp;ExecutionResult{
                 Error:  false,
                 Output: out.String(),
         }, nil</span>
@@ -241,6 +269,8 @@ import (
 )
 
 func HandleExecutePython(w http.ResponseWriter, r *http.Request) <span class="cov8" title="1">{
+        slog.Debug("HandleExecutePython called")
+
         var userSubmittedCode compiler.Code
         err := utils.ReadJSON(w, r, &amp;userSubmittedCode)
         if err != nil </span><span class="cov8" title="1">{
@@ -248,28 +278,34 @@ func HandleExecutePython(w http.ResponseWriter, r *http.Request) <span class="co
                 utils.ErrorJSON(w, err)
                 return
         }</span>
+        <span class="cov8" title="1">slog.Debug("JSON request body read successfully", "code", userSubmittedCode)
 
-        <span class="cov8" title="1">if userSubmittedCode.Lang == "" || userSubmittedCode.Src == "" </span><span class="cov8" title="1">{
+        if userSubmittedCode.Lang == "" || userSubmittedCode.Src == "" </span><span class="cov8" title="1">{
                 err := errors.New("missing fields in request payload")
-                slog.Error("Validation error", "error", err)
+                slog.Error("Validation error: missing fields in request payload", "error", err)
                 utils.ErrorJSON(w, err, http.StatusBadRequest)
                 return
         }</span>
+        <span class="cov8" title="1">slog.Debug("Request payload validation passed", "lang", userSubmittedCode.Lang, "src", userSubmittedCode.Src)
 
-        <span class="cov8" title="1">output, err := userSubmittedCode.Execute()
+        slog.Info("Executing Python script", "script", userSubmittedCode.Src)
+        output, err := userSubmittedCode.Execute()
         if err != nil </span><span class="cov0" title="0">{
                 slog.Error("Failed to execute Python script", "error", err)
                 utils.ErrorJSON(w, err, http.StatusBadRequest)
                 return
         }</span>
+        <span class="cov8" title="1">slog.Info("Python script executed successfully", "output", output)
 
-        <span class="cov8" title="1">responsePayload := utils.JsonResponse{
+        responsePayload := utils.JsonResponse{
                 Error:   false,
                 Message: "Python script has been successfully processed",
                 Data:    output,
         }
 
-        utils.WriteJSON(w, http.StatusOK, responsePayload)</span>
+        slog.Info("Sending response payload", "responsePayload", responsePayload)
+        utils.WriteJSON(w, http.StatusOK, responsePayload)
+        slog.Info("Response sent successfully", "status", http.StatusOK)</span>
 }
 </pre>
 		
@@ -279,6 +315,7 @@ import (
         "encoding/json"
         "errors"
         "io"
+        "log/slog"
         "net/http"
 )
 
@@ -289,6 +326,7 @@ type JsonResponse struct {
 }
 
 func ReadJSON(w http.ResponseWriter, r *http.Request, data any) error <span class="cov8" title="1">{
+        slog.Debug("ReadJSON called")
         maxBytes := 1048576 // one megabyte
 
         r.Body = http.MaxBytesReader(w, r.Body, int64(maxBytes))
@@ -296,50 +334,64 @@ func ReadJSON(w http.ResponseWriter, r *http.Request, data any) error <span clas
         dec := json.NewDecoder(r.Body)
         err := dec.Decode(data)
         if err != nil </span><span class="cov8" title="1">{
+                slog.Error("Failed to decode JSON", "error", err)
                 return err
         }</span>
+        <span class="cov8" title="1">slog.Debug("JSON decoded successfully", "data", data)
 
-        <span class="cov8" title="1">err = dec.Decode(&amp;struct{}{})
+        err = dec.Decode(&amp;struct{}{})
         if err != io.EOF </span><span class="cov8" title="1">{
-                return errors.New("body must have only a single JSON value")
+                err := errors.New("body must have only a single JSON value")
+                slog.Error("JSON body must have only a single value", "error", err)
+                return err
         }</span>
 
         <span class="cov8" title="1">return nil</span>
 }
 
 func WriteJSON(w http.ResponseWriter, status int, data any, headers ...http.Header) error <span class="cov8" title="1">{
+        slog.Debug("WriteJSON called", "status", status, "data", data)
+
         out, err := json.Marshal(data)
         if err != nil </span><span class="cov8" title="1">{
+                slog.Error("Failed to marshal JSON", "error", err)
                 return err
         }</span>
+        <span class="cov8" title="1">slog.Debug("JSON marshalled successfully")
 
-        <span class="cov8" title="1">if len(headers) &gt; 0 </span><span class="cov8" title="1">{
+        if len(headers) &gt; 0 </span><span class="cov8" title="1">{
                 for key, value := range headers[0] </span><span class="cov8" title="1">{
                         w.Header()[key] = value
                 }</span>
+                <span class="cov8" title="1">slog.Debug("Custom headers set", "headers", headers[0])</span>
         }
 
         <span class="cov8" title="1">w.Header().Set("Content-Type", "application/json")
         w.WriteHeader(status)
         _, err = w.Write(out)
         if err != nil </span><span class="cov8" title="1">{
+                slog.Error("Failed to write JSON response", "error", err)
                 return err
         }</span>
 
-        <span class="cov8" title="1">return nil</span>
+        <span class="cov8" title="1">slog.Debug("JSON response written successfully")
+        return nil</span>
 }
 
 func ErrorJSON(w http.ResponseWriter, err error, status ...int) error <span class="cov8" title="1">{
+        slog.Debug("ErrorJSON called", "error", err)
         statusCode := http.StatusBadRequest
 
         if len(status) &gt; 0 </span><span class="cov8" title="1">{
                 statusCode = status[0]
+                slog.Debug("Custom status code set", "statusCode", statusCode)
         }</span>
 
         <span class="cov8" title="1">var payload JsonResponse
         payload.Error = true
         payload.Message = err.Error()
 
+        slog.Debug("Error payload prepared", "payload", payload)
         return WriteJSON(w, statusCode, payload)</span>
 }
 </pre>

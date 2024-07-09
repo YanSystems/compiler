@@ -16,6 +16,7 @@ type Server struct {
 }
 
 func (s *Server) NewRouter() http.Handler {
+	slog.Info("Setting up new router")
 	router := chi.NewRouter()
 
 	router.Use(cors.Handler(cors.Options{
@@ -26,25 +27,31 @@ func (s *Server) NewRouter() http.Handler {
 		AllowCredentials: true,
 		MaxAge:           300,
 	}))
+	slog.Info("CORS middleware configured")
 
 	// Health check
 	router.Get("/health", func(w http.ResponseWriter, r *http.Request) {
+		slog.Debug("Health check endpoint hit")
 		w.WriteHeader(http.StatusOK)
 		w.Write([]byte("OK"))
 	})
+	slog.Info("Health check route configured")
 
 	// Compiler services
 	router.Post("/python", services.HandleExecutePython)
+	slog.Info("Compiler service routes configured")
 
 	return router
 }
 
 func (s *Server) NewServer() *http.Server {
+	slog.Info("Creating new server instance")
 	router := s.NewRouter()
 	server := &http.Server{
 		Addr:    fmt.Sprintf(":%s", s.Port),
 		Handler: router,
 	}
+	slog.Info("New server instance created", "port", s.Port)
 
 	return server
 }
@@ -54,6 +61,7 @@ func (s *Server) Run(server *http.Server) {
 
 	err := server.ListenAndServe()
 	if err != nil {
+		slog.Error("Server encountered an error", "error", err)
 		log.Panic(err)
 		return
 	}
